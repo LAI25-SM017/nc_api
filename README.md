@@ -6,8 +6,8 @@ cd <repository-name>
 ```
 2. Create a virtual environment:
 ```bash
-python -m venv venv
-source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+python -m venv emnv
+source env/bin/activate  # On Windows use `venv\Scripts\activate`
 ```
 3. Install the required packages:
 ```bash
@@ -19,7 +19,7 @@ python run.py
 ```
 
 ## Environment Variables
-- `DATABASE_URL`: MySQL connection string. Example: `mysql://username:password@host:port/db_name?ssl=REQUIRED`
+- `DATABASE_URL`: MySQL connection string. Example: `mysql+pymysql://username:password@host:port/db_name`
 - `FLASK_ENV`: Set to `development` for development mode.
 - `FLASK_APP`: The entry point of the application. Set to `run.py`.
 
