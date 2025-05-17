@@ -6,7 +6,7 @@ cd <repository-name>
 ```
 2. Create a virtual environment:
 ```bash
-python -m venv emnv
+python3 -m venv env
 source env/bin/activate  # On Windows use `venv\Scripts\activate`
 ```
 3. Install the required packages:
