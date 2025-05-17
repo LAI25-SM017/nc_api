@@ -19,10 +19,12 @@ python run.py
 ```
 
 ## Environment Variables
-- `DATABASE_URL`: The URL for the database connection.
+- `DATABASE_URL`: MySQL connection string. Example: `mysql+pymysql://username:password@localhost/dbname?ssl=REQUIRED`
+- `FLASK_ENV`: Set to `development` for development mode.
+- `FLASK_APP`: The entry point of the application. Set to `run.py`.
 
 ## Migration
-1. Initialize the migration (only once):
+1. Initialize the migration (only once, I already did this so you can skip this step unless you remove the migrations folder):
 ```bash
 flask db init
 ```
