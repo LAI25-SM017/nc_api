@@ -3,12 +3,13 @@ version: "3.9"
 services:
   web:
     build: .
-    command: flask run --host=0.0.0.0
+    container_name: nc_api_service
+    command: gunicorn --bind 0.0.0.0:5000 --access-logfile - --error-logfile - --log-level info run:app
     ports:
       - "5000:5000"
     environment:
       - FLASK_APP=run.py
-      - FLASK_ENV=development
-      - DATABASE_URL=mysql://username:password@host:port/db_name?ssl=REQUIRED`  # <-- Replace with your actual URI
+      - FLASK_ENV=production
+      - DATABASE_URL=mysql+pymysql://xx:xx@xx:xx/xx
     volumes:
       - .:/app
