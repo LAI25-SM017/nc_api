@@ -1,3 +1,5 @@
+# NextCourse API
+
 ## Running the Application
 1. Clone the repository:
 ```bash
@@ -64,9 +66,9 @@ docker stop <container_id>
 ### Using Docker Compose
 1. Build and run the Docker containers:
 ```bash
-docker-compose up --build
+docker compose up --build
 ```
 2. Stop the containers:
 ```bash
-docker-compose down
+docker compose down
 ```
