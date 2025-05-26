@@ -14,3 +14,6 @@ class User(db.Model):
             'username': self.username,
             'email': self.email
         }
+        
+    def get_password_hash(self):
+        return self.password_hash
