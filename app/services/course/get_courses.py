@@ -1,6 +1,6 @@
 from app.models.course import Course
 from app.extensions import db
-from app.services.course.recommender import get_recommendations_by_course_id
+from app.services.recommender.contentbased_model import ContentBasedModel
 
 def get_all_courses():
     return [course.to_dict() for course in Course.query.all()]
@@ -23,11 +23,9 @@ def get_random_courses(n=2):
 
 # Get recommended courses based on the course_id
 def get_recommended_courses_by_course_id(course_id, n):
-    course_ids = get_recommendations_by_course_id(course_id, n)
-    courses = []
+    # Get the singleton instance of ContentBasedModel
+    model_instance = ContentBasedModel()
     
-    for course_id in course_ids:
-        course = Course.query.filter_by(course_id=course_id).first()
-        if course:
-            courses.append(course.to_dict())
-    return courses
+    courses = model_instance.get_recommendations_by_course_id(course_id)
+    
+    return courses[:n]
