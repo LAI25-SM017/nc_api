@@ -73,7 +73,7 @@ def get_recommended_courses_1_route():
         
         return jsonify({
             'status': 'success',
-            'message': f'Successfully fetched {n} recommended courses for course ID {course_id}',
+            'message': f'Successfully fetched {len(courses)} recommended courses for course ID {course_id}',
             'data': courses
             }), 200
     except Exception as e:
