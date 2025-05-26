@@ -6,6 +6,8 @@ from flask_migrate import Migrate
 from flask_cors import CORS
 
 from flask_jwt_extended import JWTManager
+from flask_jwt_extended.exceptions import NoAuthorizationError
+from flask import jsonify
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -31,6 +33,16 @@ def create_app():
     
     # JWT
     jwt = JWTManager(app)
+    @app.errorhandler(NoAuthorizationError)
+    def handle_no_authorization_error(e):
+        """
+        Custom handler for missing Authorization Header.
+        """
+        return jsonify({
+            'status': 'error',
+            'message': 'Authorization header is missing or invalid',
+            'data': {}
+        }), 401
     
     # Initialize the ContentBasedModel singleton
     content_based_model = ContentBasedModel()
