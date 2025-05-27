@@ -26,6 +26,6 @@ def get_recommended_courses_by_course_id(course_id, n):
     # Get the singleton instance of ContentBasedModel
     model_instance = ContentBasedModel()
     
-    courses = model_instance.get_recommendations_by_course_id(course_id)
+    courses = model_instance.get_recommendations_by_course_id(course_id, n)
     
-    return courses[:n]
+    return courses
