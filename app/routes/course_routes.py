@@ -69,6 +69,17 @@ def get_recommended_courses_1_route():
         course_id = request.args.get('course_id', default=1, type=int)
         n = request.args.get('n', default=5, type=int)
         
+        # Sanity check for n
+        if n <= 0:
+            return jsonify({
+                'status': 'error',
+                'message': 'Parameter n must be a positive integer',
+                'data': {}
+                }), 400
+        
+        if n > 1000:
+            n = 1000  # Limit n to a maximum of 1000
+        
         courses = get_recommended_courses_by_course_id(course_id, n)
         
         return jsonify({
