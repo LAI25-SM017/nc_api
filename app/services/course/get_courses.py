@@ -1,6 +1,7 @@
 from app.models.course import Course
 from app.extensions import db
 from app.services.recommender.contentbased_model import ContentBasedModel
+from app.services.recommender.collaborative_model import CollaborativeModel
 
 def get_all_courses():
     return [course.to_dict() for course in Course.query.all()]
@@ -27,5 +28,13 @@ def get_recommended_courses_by_course_id(course_id, n):
     model_instance = ContentBasedModel()
     
     courses = model_instance.get_recommendations_by_course_id(course_id, n)
+    
+    return courses
+
+def get_recommended_courses_by_user_id(user_id, n):
+    # Get the singleton instance of CollaborativeModel
+    model_instance = CollaborativeModel()
+    
+    courses = model_instance.get_recommendations_by_user_id(user_id, n)
     
     return courses

@@ -19,6 +19,7 @@ from .routes.course_routes import course_bp
 from .routes.user_routes import user_bp
 
 from .services.recommender.contentbased_model import ContentBasedModel
+from .services.recommender.collaborative_model import CollaborativeModel
 
 def create_app():
     app = Flask(__name__)
@@ -47,6 +48,10 @@ def create_app():
     # Initialize the ContentBasedModel singleton
     content_based_model = ContentBasedModel()
     print("ContentBasedModel initialized.")
+    
+    # Initialize the CollaborativeModel singleton
+    colaborative_model = CollaborativeModel()
+    print("ColaborativeModel initialized.")
     
     # Register blueprints
     app.register_blueprint(user_bp)

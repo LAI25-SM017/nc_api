@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from jsonschema import validate, ValidationError
 
-from app.services.course.get_courses import get_all_courses, get_course_by_id, get_random_courses, get_recommended_courses_by_course_id
+from app.services.course.get_courses import get_all_courses, get_course_by_id, get_random_courses, get_recommended_courses_by_course_id, get_recommended_courses_by_user_id
 from app.services.course.create_courses import create_courses
 from app.models.course_schema import add_courses_schema
 
@@ -93,7 +93,38 @@ def get_recommended_courses_1_route():
             'message': f'Error fetching recommended courses for course ID {course_id}: {str(e)}',
             'data': {}
             }), 500
-
+        
+# Colaborative test
+@course_bp.route('/recommender2', methods=['GET'])
+def get_recommended_courses_2_route():
+    try:
+        user_id = request.args.get('user_id', default='user_1', type=str)
+        n = request.args.get('n', default=5, type=int)
+        
+        # Sanity check for n
+        if n <= 0:
+            return jsonify({
+                'status': 'error',
+                'message': 'Parameter n must be a positive integer',
+                'data': {}
+                }), 400
+        
+        if n > 1000:
+            n = 1000  # Limit n to a maximum of 1000
+        
+        courses = get_recommended_courses_by_user_id(user_id, n)
+        
+        return jsonify({
+            'status': 'success',
+            'message': f'Successfully fetched {len(courses)} recommended courses for user ID {user_id}',
+            'data': courses
+            }), 200
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': f'Error fetching recommended courses for user ID {user_id}: {str(e)}',
+            'data': {}
+            }), 500
 
 # Should not be needed in the current version
 # @course_bp.route('/', methods=['POST'])
