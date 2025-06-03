@@ -16,6 +16,9 @@ class Course(db.Model):
     content_duration = db.Column(db.Float, nullable=False)
     published_timestamp = db.Column(db.String(50), nullable=False)
     subject = db.Column(db.String(50), nullable=False)
+    total_interactions = db.Column(db.Integer, default=0)
+    total_users = db.Column(db.Integer, default=0)
+    image_banner_url = db.Column(db.String(512), nullable=True)
 
     def to_dict(self):
         return {
@@ -31,5 +34,8 @@ class Course(db.Model):
             'level': self.level,
             'content_duration': self.content_duration,
             'published_timestamp': self.published_timestamp,
-            'subject': self.subject
+            'subject': self.subject,
+            'total_interactions': self.total_interactions,
+            'total_users': self.total_users,
+            'image_banner_url': self.image_banner_url
         }
