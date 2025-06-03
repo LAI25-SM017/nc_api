@@ -16,7 +16,10 @@ def create_courses(courses):
                 level=course['level'],
                 content_duration=course['content_duration'],
                 published_timestamp=course['published_timestamp'],
-                subject=course['subject']
+                subject=course['subject'],
+                total_interactions=course['total_interactions'],
+                total_users=course['total_users'],
+                image_banner_url=course['image_banner_url'] 
             )
             db.session.add(new_course)
         db.session.commit()
