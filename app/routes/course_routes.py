@@ -7,7 +7,7 @@ from app.models.course_schema import add_courses_schema
 
 course_bp = Blueprint('course_bp', __name__)
 
-@course_bp.route('/', methods=['GET'])
+@course_bp.route('', methods=['GET'])
 def get_courses_route():
     # Subject mapping:
     # 1 -> 'Business Finance'
