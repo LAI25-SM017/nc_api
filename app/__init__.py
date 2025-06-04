@@ -55,6 +55,11 @@ def create_app():
     
     # Register blueprints
     app.register_blueprint(user_bp, provide_automatic_options=True)
-    app.register_blueprint(course_bp, url_prefix="/api/courses", provide_automatic_options=True)
+    app.register_blueprint(
+            course_bp,
+            url_prefix="/api/courses",
+            provide_automatic_options=True,
+            strict_slashes=False
+        )
 
     return app
