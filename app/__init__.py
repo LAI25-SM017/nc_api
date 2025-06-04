@@ -54,7 +54,7 @@ def create_app():
     print("ColaborativeModel initialized.")
     
     # Register blueprints
-    app.register_blueprint(user_bp)
-    app.register_blueprint(course_bp, url_prefix="/api/courses")
+    app.register_blueprint(user_bp, provide_automatic_options=True)
+    app.register_blueprint(course_bp, url_prefix="/api/courses", provide_automatic_options=True)
 
     return app
