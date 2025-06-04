@@ -1,9 +1,12 @@
 from flask import Blueprint, request, jsonify
 from jsonschema import validate, ValidationError
+from flask_jwt_extended import get_jwt_identity
+from flask_jwt_extended import jwt_required
 
 from app.services.course.get_courses import get_all_courses, get_course_by_id, get_random_courses, get_recommended_courses_by_course_id, get_recommended_courses_by_user_id, get_courses
 from app.services.course.create_courses import create_courses
 from app.models.course_schema import add_courses_schema
+from app.services.user.get_user import get_user_by_username
 
 course_bp = Blueprint('course_bp', __name__)
 
@@ -154,6 +157,54 @@ def get_recommended_courses_2_route():
             n = 1000  # Limit n to a maximum of 1000
         
         courses = get_recommended_courses_by_user_id(user_id, n)
+        
+        return jsonify({
+            'status': 'success',
+            'message': f'Successfully fetched {len(courses)} recommended courses for user ID {user_id}',
+            'data': courses
+            }), 200
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': f'Error fetching recommended courses for user ID {user_id}: {str(e)}',
+            'data': {}
+            }), 500
+
+# Authed recommender, use user_id from auth
+@course_bp.route('/recommender3', methods=['GET'])
+@jwt_required()
+def get_recommended_courses_3_route():
+    """
+    Get recommended courses for a user based on their user_id.
+    This endpoint is intended to be used with an authenticated user.
+    """
+    try:
+        n = request.args.get('n', default=5, type=int)
+        # Sanity check for n
+        if n <= 0:
+            return jsonify({
+                'status': 'error',
+                'message': 'Parameter n must be a positive integer',
+                'data': {}
+                }), 400
+        
+        if n > 200:
+            n = 200  # Limit n to a maximum of 200
+        
+        username = get_jwt_identity()        
+        user = get_user_by_username(username)
+        
+        if not user:
+            return jsonify({
+                'status': 'error',
+                'message': 'User not found',
+                'data': {}
+            }), 404
+        
+        user_id = user['id']
+        formatted_user_id = f'user_{user_id}'
+        
+        courses = get_recommended_courses_by_user_id(formatted_user_id, n)
         
         return jsonify({
             'status': 'success',
