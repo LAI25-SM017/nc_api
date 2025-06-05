@@ -9,7 +9,7 @@ def get_all_courses():
 def get_courses(page=1, per_page=10, subject=None, level=None, is_paid=None, order_by='num_subscribers', order_direction='desc'):
     # Subject mapping:
     # 1 -> 'Business Finance'
-    # 2 -> 'Graphics Design'
+    # 2 -> 'Graphic Design'
     # 3 -> 'Web Development'
     # 4 -> 'Musical Instruments'
     
@@ -39,7 +39,7 @@ def get_courses(page=1, per_page=10, subject=None, level=None, is_paid=None, ord
         
     subject_mapping = {
         1: 'Business Finance',
-        2: 'Graphics Design',
+        2: 'Graphic Design',
         3: 'Web Development',
         4: 'Musical Instruments'
     }

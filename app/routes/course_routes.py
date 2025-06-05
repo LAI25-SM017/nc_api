@@ -14,7 +14,7 @@ course_bp = Blueprint('course_bp', __name__)
 def get_courses_route():
     # Subject mapping:
     # 1 -> 'Business Finance'
-    # 2 -> 'Graphics Design'
+    # 2 -> 'Graphic Design'
     # 3 -> 'Web Development'
     # 4 -> 'Musical Instruments'
     

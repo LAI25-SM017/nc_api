@@ -15,7 +15,7 @@ def create_user(username, email, password):
     if not hashed_password:
         raise ValueError("Failed to hash password")
     
-    new_user = User(username=username, email=email, password_hash=hashed_password)
+    new_user = User(username=username, email=email, password_hash=hashed_password, onboarding_done=False)
     
     db.session.add(new_user)
     db.session.commit()
