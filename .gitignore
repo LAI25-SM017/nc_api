@@ -2,4 +2,5 @@ env
 __pycache__/
 .vscode
 .env
-populate_user.py
+direct_db
+script_*

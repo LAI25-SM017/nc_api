@@ -46,11 +46,11 @@ def create_app():
         }), 401
     
     # Initialize the ContentBasedModel singleton
-    content_based_model = ContentBasedModel()
+    # content_based_model = ContentBasedModel()
     print("ContentBasedModel initialized.")
     
     # Initialize the CollaborativeModel singleton
-    colaborative_model = CollaborativeModel()
+    # colaborative_model = CollaborativeModel()
     print("ColaborativeModel initialized.")
     
     # Register blueprints
