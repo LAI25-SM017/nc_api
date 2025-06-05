@@ -1,3 +1,5 @@
+import os
+
 import pymysql
 pymysql.install_as_MySQLdb()
 
@@ -8,6 +10,8 @@ from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from flask_jwt_extended.exceptions import NoAuthorizationError
 from flask import jsonify
+
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -26,6 +30,10 @@ def create_app():
     CORS(app)
     
     app.config.from_object(Config)
+    
+    if os.getenv("FLASK_ENV") == "production":
+        # Apply ProxyFix only in production
+        app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
     
     # DB
     print(f"Using database: {app.config['SQLALCHEMY_DATABASE_URI']}")  # Debug line
