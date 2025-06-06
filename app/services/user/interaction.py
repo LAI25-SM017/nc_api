@@ -10,7 +10,7 @@ def add_user_interaction(user_id, course_id, interaction_type):
     Adds a user interaction to the database after validating the IDs.
     
     :param user_id: ID of the user
-    :param course_id: ID of the course
+    :param course_id: ID of the course (not the primary key)
     :param interaction_type: Type of interaction (e.g., 'view', 'enrolled', 'complete', 'buy')
     :return: The created UserInteraction object or an error message
     """
@@ -18,11 +18,10 @@ def add_user_interaction(user_id, course_id, interaction_type):
     if not user:
         raise ValueError(f"User with ID {user_id} does not exist.")
     
-    course = Course.query.get({
-        'course_id': course_id
-    })
+    # Use filter_by() to query by course_id (not the primary key)
+    course = Course.query.filter_by(course_id=course_id).first()
     if not course:
-        raise ValueError(f"Course with ID {course_id} does not exist.")
+        raise ValueError(f"Course with course_id {course_id} does not exist.")
     
     interaction = UserInteraction(user_id=user_id, course_id=course_id, interaction_type=interaction_type)
     try:
