@@ -10,6 +10,7 @@ from app.models.user_preference_schema import create_preference_request_schema
 from app.services.user.create_user import create_user
 from app.services.user.get_user import get_user_by_id, get_user_by_username, get_password_hash_by_username
 from app.services.user.onboarding import complete_onboarding, get_user_preferences, reset_onboarding
+from app.services.user.interaction import add_user_interaction, get_user_interactions, delete_user_interaction_by_id
 
 from app.services.helper.crypto import verify_password
 from datetime import timedelta
@@ -120,13 +121,27 @@ def get_current_user():
     try:
         username = get_jwt_identity()
         user = get_user_by_username(username)
+        if not user:
+            return jsonify({
+                'status': 'error',
+                'message': 'User not found',
+                'data': {}
+            }), 404
+        
         user_preferences = get_user_preferences(user['id'])
+        user_interactions = get_user_interactions(user['id'])
+        user_interactions = [
+            {key: value for key, value in interaction.items() if key != 'user_id'}
+            for interaction in user_interactions
+        ]
+        
         return jsonify({
             'status': 'success',
             'message': 'User retrieved successfully',
             'data': {
                 'user': user,
-                'preferences': user_preferences
+                'preferences': user_preferences,
+                'interactions': user_interactions
             }
         }), 200
     except Exception as e:
@@ -244,5 +259,92 @@ def reset_user_onboarding():
         return jsonify({
             'status': 'error',
             'message': f'Error resetting onboarding: {str(e)}',
+            'data': {}
+        }), 500
+        
+@user_bp.route('/interactions', methods=['POST'])
+@jwt_required()
+def log_user_interaction():
+    """
+    Endpoint to log user interactions.
+    Requires a valid JWT token.
+    
+    Expects JSON payload:
+    {
+        "course_id": 123,
+        "interaction_type": "view"  # e.g., 'view', 'enrolled', 'complete', 'buy'
+    }
+    """
+    data = request.get_json(silent=True)
+    if not data:
+        return jsonify({
+            'status': 'error',
+            'message': 'No data provided',
+            'data': {}
+        }), 400
+        
+    username = get_jwt_identity()
+    user = get_user_by_username(username)
+    if not user:
+        return jsonify({
+            'status': 'error',
+            'message': 'User not found',
+            'data': {}
+        }), 404
+        
+    course_id = data.get('course_id')
+    interaction_type = data.get('interaction_type')
+    if not course_id or not interaction_type:
+        return jsonify({
+            'status': 'error',
+            'message': 'Missing course_id or interaction_type',
+            'data': {}
+        }), 400
+        
+    try:
+        interaction = add_user_interaction(user['id'], course_id, interaction_type)
+        return jsonify({
+            'status': 'success',
+            'message': 'Interaction logged successfully',
+            'data': interaction.to_dict()
+        }), 201
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': f'Error logging interaction: {str(e)}',
+            'data': {}
+        }), 500
+
+@user_bp.route('/interactions/<int:interaction_id>', methods=['DELETE'])
+@jwt_required()
+def delete_user_interaction(interaction_id):
+    """
+    Endpoint to delete a user interaction by ID.
+    Requires a valid JWT token.
+    
+    :param interaction_id: ID of the interaction to delete
+    """
+    
+    try:
+        username = get_jwt_identity()
+        user = get_user_by_username(username)
+        
+        if not user:
+            return jsonify({
+                'status': 'error',
+                'message': 'User not found',
+                'data': {}
+            }), 404
+            
+        message = delete_user_interaction_by_id(interaction_id)
+        return jsonify({
+            'status': 'success',
+            'message': message,
+            'data': {}
+        }), 200
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': f'Error deleting interaction: {str(e)}',
             'data': {}
         }), 500
