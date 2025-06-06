@@ -18,7 +18,9 @@ def add_user_interaction(user_id, course_id, interaction_type):
     if not user:
         raise ValueError(f"User with ID {user_id} does not exist.")
     
-    course = Course.query.get(course_id)
+    course = Course.query.get({
+        'course_id': course_id
+    })
     if not course:
         raise ValueError(f"Course with ID {course_id} does not exist.")
     
