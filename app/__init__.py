@@ -19,6 +19,8 @@ load_dotenv()
 from .config import Config
 from .extensions import db
 
+from app.models.user_interaction import UserInteraction
+
 from .routes.course_routes import course_bp
 from .routes.user_routes import user_bp
 
@@ -54,11 +56,11 @@ def create_app():
         }), 401
     
     # Initialize the ContentBasedModel singleton
-    # content_based_model = ContentBasedModel()
+    content_based_model = ContentBasedModel()
     print("ContentBasedModel initialized.")
     
     # Initialize the CollaborativeModel singleton
-    # colaborative_model = CollaborativeModel()
+    colaborative_model = CollaborativeModel()
     print("ColaborativeModel initialized.")
     
     # Register blueprints

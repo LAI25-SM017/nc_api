@@ -12,13 +12,15 @@ class Course(db.Model):
     num_subscribers = db.Column(db.Integer, default=0)
     num_reviews = db.Column(db.Integer, default=0)
     num_lectures = db.Column(db.Integer, default=0)
-    level = db.Column(db.String(50), nullable=False)
+    level = db.Column(db.String(40), nullable=False)
     content_duration = db.Column(db.Float, nullable=False)
     published_timestamp = db.Column(db.String(50), nullable=False)
     subject = db.Column(db.String(50), nullable=False)
     total_interactions = db.Column(db.Integer, default=0)
     total_users = db.Column(db.Integer, default=0)
     image_banner_url = db.Column(db.String(512), nullable=True)
+    
+    interactions = db.relationship('UserInteraction', back_populates='course', lazy='dynamic')
 
     def to_dict(self):
         return {

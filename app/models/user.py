@@ -11,6 +11,8 @@ class User(db.Model):
     
     preferences = db.relationship('UserPreferences', back_populates='user', lazy='dynamic')
     
+    interactions = db.relationship('UserInteraction', back_populates='user', lazy='dynamic')
+    
     def to_dict(self):
         return {
             'id': self.id,
