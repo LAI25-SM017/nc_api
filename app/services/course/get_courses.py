@@ -6,7 +6,7 @@ from app.services.recommender.collaborative_model import CollaborativeModel
 def get_all_courses():
     return [course.to_dict() for course in Course.query.all()]
     
-def get_courses(page=1, per_page=10, subject=None, level=None, is_paid=None, order_by='num_subscribers', order_direction='desc'):
+def get_courses(page=1, per_page=10, subject=None, level=None, is_paid=None, order_by='num_subscribers', order_direction='desc', search_query=None):
     # Subject mapping:
     # 1 -> 'Business Finance'
     # 2 -> 'Graphic Design'
@@ -62,9 +62,6 @@ def get_courses(page=1, per_page=10, subject=None, level=None, is_paid=None, ord
         if not isinstance(level, list):
             level = [level]
         level = [level_mapping.get(l) for l in level if l in level_mapping]
-
-    print("Mapped Subjects:", subject)
-    print("Mapped Levels:", level)
     
     query = Course.query
     if subject:
@@ -73,6 +70,8 @@ def get_courses(page=1, per_page=10, subject=None, level=None, is_paid=None, ord
         query = query.filter(Course.level.in_(level))
     if is_paid is not None:
         query = query.filter_by(is_paid=is_paid)
+    if search_query:
+        query = query.filter(Course.course_title.ilike(f"%{search_query}%"))
         
     if order_by == 'num_subscribers':
         if order_direction == 'desc':
