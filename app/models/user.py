@@ -19,7 +19,8 @@ class User(db.Model):
             'id': self.id,
             'username': self.username,
             'email': self.email,
-            'onboarding_done': self.onboarding_done  # Include the new column
+            'onboarding_done': self.onboarding_done,
+            'used_in_collaborative': self.used_in_collaborative,
         }
         
     def get_password_hash(self):
