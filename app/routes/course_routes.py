@@ -45,8 +45,9 @@ def get_courses_route():
         is_paid = request.args.get('is_paid', default=None, type=int)
         order_by = request.args.get('order_by', default='num_subscribers', type=str)
         order_direction = request.args.get('order_direction', default='desc', type=str)
+        search_query = request.args.get('search', default=None, type=str)
 
-        courses_paginate = get_courses(page, per_page, subject, level, is_paid, order_by, order_direction)
+        courses_paginate = get_courses(page, per_page, subject, level, is_paid, order_by, order_direction, search_query)
         courses_number = len(courses_paginate['courses'])
         
         return jsonify({
