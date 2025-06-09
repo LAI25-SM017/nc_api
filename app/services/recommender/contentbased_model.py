@@ -16,44 +16,54 @@ df_courses = pd.read_csv(
     Path(__file__).parent.parent.parent.parent / "ml_model" / "content_based" / "udemy_courses_new.csv"
 )
 
-class CourseModel(keras.Model):
-    def __init__(self, embedding_dim, subject_vocab, level_vocab, course_ids):
+# 🔁 Load scaler hasil training
+scaler_path = Path(__file__).parent.parent.parent.parent / "ml_model" / "content_based" / "scaler.pkl"
+with open(scaler_path, "rb") as f:
+    scaler = pickle.load(f)
+
+# 📊 Normalisasi fitur numerik menggunakan scaler dari training
+numerical_features = ['price', 'num_subscribers', 'num_reviews', 'num_lectures', 'content_duration']
+df_courses[numerical_features] = scaler.transform(df_courses[numerical_features])
+
+class CourseModel(tf.keras.Model):
+    def __init__(self, embedding_dim, subject_vocab, level_vocab, course_ids, vectorizer_path=None):
         super().__init__()
 
-        # 🔍 Embedding untuk course_id (mengubah ID jadi vektor numerik)
+        # Embedding categorical features
         self.course_embedding = tf.keras.Sequential([
             tf.keras.layers.StringLookup(vocabulary=course_ids, mask_token=None),
             tf.keras.layers.Embedding(len(course_ids) + 1, embedding_dim)
         ])
 
-        # 🎓 Embedding untuk subject course (kategori mata pelajaran)
         self.subject_embedding = tf.keras.Sequential([
             tf.keras.layers.StringLookup(vocabulary=subject_vocab, mask_token=None),
             tf.keras.layers.Embedding(len(subject_vocab) + 1, max(4, embedding_dim // 4))
         ])
 
-        # 🏷️ Embedding untuk level course (pemula, menengah, dsb)
         self.level_embedding = tf.keras.Sequential([
             tf.keras.layers.StringLookup(vocabulary=level_vocab, mask_token=None),
             tf.keras.layers.Embedding(len(level_vocab) + 1, max(2, embedding_dim // 8))
         ])
 
-        # ✍️ Vektorisasi teks judul course dengan TF-IDF dan dense layer
-        self.title_vectorizer = tf.keras.layers.TextVectorization(max_tokens=1000, output_mode='tf-idf')
-        self.title_vectorizer.adapt(df_courses["course_title"].astype(str).tolist())
+        # ⬇️ Perbedaan penting ada di sini
+        if vectorizer_path:
+            # Inference mode: load saved vectorizer
+            self.title_vectorizer = tf.keras.models.load_model(vectorizer_path, compile=False)
+        else:
+            # Training mode: adapt vectorizer
+            self.title_vectorizer = tf.keras.layers.TextVectorization(max_tokens=1000, output_mode='tf-idf')
+            self.title_vectorizer.adapt(df_courses["course_title"].astype(str).tolist())
 
         self.title_embedding = tf.keras.Sequential([
             self.title_vectorizer,
             tf.keras.layers.Dense(embedding_dim, activation="relu"),
         ])
 
-        # 📊 Dense layer untuk fitur numerik seperti harga, jumlah subscriber, dll
         self.numerical_dense = tf.keras.Sequential([
             tf.keras.layers.Dense(embedding_dim // 4, activation="relu"),
             tf.keras.layers.Dense(embedding_dim // 8, activation="relu"),
         ])
 
-        # 🔗 Gabungkan semua embedding lalu proses dengan dense layers
         self.final_dense1 = tf.keras.layers.Dense(embedding_dim * 2, activation="relu")
         self.final_dense2 = tf.keras.layers.Dense(embedding_dim)
 
@@ -107,6 +117,9 @@ class ContentBasedModel:
     _instance = None
     _lock = Lock()
     
+    model = None
+    index = None
+    
     def __new__(cls, *args, **kwargs):
         if not cls._instance:
             with cls._lock:
@@ -125,6 +138,7 @@ class ContentBasedModel:
         
         # Dynamically construct the path to the saved model directory
         model_dir = Path(__file__).parent.parent.parent.parent / "ml_model" / "content_based"
+        
         if model_dir.exists():
             with open(model_dir / "course_ids.pkl", "rb") as f:
                 loaded_course_ids = pickle.load(f)
@@ -133,32 +147,23 @@ class ContentBasedModel:
             with open(model_dir / "level_vocab.pkl", "rb") as f:
                 loaded_level_vocab = pickle.load(f)
                 
+            vectorizer_path = model_dir / "title_vectorizer_model"
+                
             loaded_model = CourseModel(
                 embedding_dim=64,  # match the embedding_dim used during training
                 subject_vocab=loaded_subject_vocab,  # load subject vocab from the saved file
                 level_vocab=loaded_level_vocab,  # load level vocab from the saved file
-                course_ids=loaded_course_ids  # load course IDs from the saved file
+                course_ids=loaded_course_ids,  # load course IDs from the saved file
+                vectorizer_path=vectorizer_path  # ⬅️ Ini penting
             )
             
             # Compile the loaded model as done during training
             loaded_model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.0008901416500660483))
-            
-            # Call the model with dummy input to initialize variables
-            dummy_input = {
-                "course_id": tf.constant(["dummy_course"]),
-                "course_title": tf.constant(["dummy_title"]),
-                "subject": tf.constant(["dummy_subject"]),
-                "level": tf.constant(["dummy_level"]),
-                "price": tf.constant([0.0], dtype=tf.float32),
-                "num_subscribers": tf.constant([0.0], dtype=tf.float32),
-                "num_reviews": tf.constant([0.0], dtype=tf.float32),
-                "num_lectures": tf.constant([0.0], dtype=tf.float32),
-                "content_duration": tf.constant([0.0], dtype=tf.float32),
-            }
-            loaded_model(dummy_input)
 
             # Load the model weights
-            loaded_model.load_weights(model_dir / "model_weights" / "model_weights")
+            loaded_model.load_weights(model_dir / "model weights" / "model_weights")
+            
+            self.model = loaded_model
             
             tf_all_courses = make_tf_dataset(df_courses, batch_size=64, shuffle=False)
             
@@ -167,7 +172,7 @@ class ContentBasedModel:
                 tf_all_courses.map(lambda x: (x["course_id"], loaded_model(x)))
             )
             
-            self.model = loaded_index
+            self.index = loaded_index
 
         else:
             raise FileNotFoundError(f"Model directory {model_dir} does not exist. Please ensure the model is saved correctly.")
@@ -181,6 +186,15 @@ class ContentBasedModel:
         """
         return self.model
     
+    def get_index(self):
+        """
+        Get the index for the content-based recommendation model.
+        
+        Returns:
+            The index for the content-based recommendation model.
+        """
+        return self.index
+    
     def get_recommendations_by_course_id(self, course_id, n):
         # Check if course_id is valid
         if not isinstance(course_id, int):
@@ -192,7 +206,7 @@ class ContentBasedModel:
             raise ValueError(f"Course with ID {course_id} does not exist.")
         
         # Get the model
-        model = self.get_model()
+        index = self.get_index()
         
         # Prepare the input for the model
         query_features = {
@@ -208,7 +222,7 @@ class ContentBasedModel:
         }
         
         # Get recommendations from the model
-        scores, ids = model(query_features, k=n)
+        scores, ids = index(query_features, k=n)
         
         recommendations = []
 
