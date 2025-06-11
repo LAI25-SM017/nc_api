@@ -22,7 +22,7 @@ from app.extensions import limiter
 user_bp = Blueprint('user_bp', __name__)
 
 @user_bp.route('/register', methods=['POST'])
-@limiter.limit("2/minute")
+@limiter.limit("5/minute")
 def register_user():
     """
     Endpoint to register a new user.
