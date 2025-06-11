@@ -4,6 +4,8 @@ from flask_jwt_extended import create_access_token
 from flask_jwt_extended import get_jwt_identity
 from flask_jwt_extended import jwt_required
 
+from flask_limiter import Limiter
+
 from app.models.user_schema import register_request_schema
 from app.models.user_preference_schema import create_preference_request_schema
 
@@ -15,9 +17,12 @@ from app.services.user.interaction import add_user_interaction, get_user_interac
 from app.services.helper.crypto import verify_password
 from datetime import timedelta
 
+from app.extensions import limiter
+
 user_bp = Blueprint('user_bp', __name__)
 
 @user_bp.route('/register', methods=['POST'])
+@limiter.limit("2/minute")
 def register_user():
     """
     Endpoint to register a new user.
