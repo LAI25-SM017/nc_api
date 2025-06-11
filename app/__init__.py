@@ -13,11 +13,14 @@ from flask import jsonify
 
 from werkzeug.middleware.proxy_fix import ProxyFix
 
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+
 from dotenv import load_dotenv
 load_dotenv()
 
 from .config import Config
-from .extensions import db
+from .extensions import db, limiter
 
 from app.models.user_interaction import UserInteraction
 
@@ -32,11 +35,22 @@ def create_app():
     CORS(app)
     
     app.config.from_object(Config)
-    
+
     if os.getenv("FLASK_ENV") == "production":
         # Apply ProxyFix only in production
         app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
-    
+        
+    # Initialize Flask-Limiter
+    limiter.init_app(app)
+    # Custom error handler for 429 Too Many Requests
+    @app.errorhandler(429)
+    def ratelimit_error(e):
+        return jsonify({
+            'status': 'error',
+            'message': 'Rate limit exceeded. Please try again later.',
+            'data': {}
+        }), 429
+        
     # DB
     print(f"Using database: {app.config['SQLALCHEMY_DATABASE_URI']}")  # Debug line
     db.init_app(app)
