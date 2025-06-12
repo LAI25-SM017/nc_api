@@ -7,7 +7,7 @@ from flask_limiter.util import get_remote_address
 db = SQLAlchemy()
 
 # Initialize Flask-Limiter parameters
-default_limits=["10 per second"]
+default_limits=["100 per second"]
 storage_uri = "memory://"
 
 if os.getenv("FLASK_ENV") == "production":
