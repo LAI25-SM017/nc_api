@@ -2,10 +2,7 @@
 
 ## Running the Application
 1. Clone the repository:
-```bash
-git clone ""
-cd <repository-name>
-```
+
 2. Create a virtual environment:
 ```bash
 python3 -m venv env
@@ -24,9 +21,11 @@ python run.py
 - `DATABASE_URL`: MySQL connection string. Example: `mysql+pymysql://username:password@host:port/db_name`
 - `FLASK_ENV`: Set to `development` for development mode.
 - `FLASK_APP`: The entry point of the application. Set to `run.py`.
+- `JWT_SECRET_KEY`: Secret key for JWT.
+= `REDIS_URL`: Redis connection string. Example: `redis://localhost:6379/0`. Used when `FLASK_ENV` is set to `production`.
 
-## Migration
-1. Initialize the migration (only once, I already did this so you can skip this step unless you remove the migrations folder):
+## Apply Migration
+1. Initialize the migration:
 ```bash
 flask db init
 ```
